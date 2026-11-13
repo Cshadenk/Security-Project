@@ -5,13 +5,9 @@ from database import get_db, init_db
 
 app = Flask(__name__) 
 
-# المفتاح السري: Flask يوقّع فيه الكوكي عشان ما أحد يزوّر الـ session.
-# مؤقت الحين، والشخص المسؤول عن التشفير يغيّره لمفتاح قوي عشوائي.
 app.secret_key = "temporary-key-change-later"
 
-# False = ضعيف (SQL Injection يشتغل)
-# True  = آمن (parameterized queries)
-SECURE_MODE = False
+SECURE_MODE = True
 
 
 @app.after_request
@@ -33,11 +29,21 @@ def register():
         password = request.form["password"]
 
         conn = get_db()
-        conn.execute(
-            "INSERT INTO users (username, password) VALUES (?, ?)",
+        try:
+            if not SECURE_MODE:
+                query = ("INSERT INTO users (username, password, role)"
+                         f"VALUES ('{username}', '{password}', 'user')"
+                )
+                conn.execute(query)
+            else:
+             conn.execute(
+            "INSERT INTO users (username, password, role) VALUES (?, ?, 'user')",
             (username, password)
         )
-        conn.commit()
+            conn.commit()
+        except Exception:
+         conn.close()
+         return render_template("register.html", error="Registration failed")
         conn.close()
 
         return redirect("/login")
@@ -67,13 +73,12 @@ def login():
             session["role"] = user["role"]
             return redirect("/dashboard")
         
-            return render_template("login.html", error="Invalid credentials")
+        return render_template("login.html", error="Invalid credentials")
     return render_template("login.html")
 
 
 @app.route("/dashboard")
 def dashboard():
-    # لو ما فيه session (ما سجّلت دخول)، نرجّعه لصفحة login
     if "user_id" not in session:
         return redirect("/login")
     return render_template("dashboard.html")
