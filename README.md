@@ -58,7 +58,8 @@ python3 -m pip install -r requirements.txt
 
 Self-signed certificate (HTTPS):
 ```bash
-Automatically generated locally for testing via `SessionCryptoManager` (`crypto_session.py`) when running `app.py`.```
+Automatically generated locally for testing via `SessionCryptoManager` (`crypto_session.py`) when running `app.py`.
+```
 
 Run:
 ```bash
