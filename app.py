@@ -11,7 +11,6 @@ from crypto_session import SessionCryptoManager
 app = Flask(__name__) 
 crypto = SessionCryptoManager()
 crypto.apply_flask_session_config(app)
-##app.secret_key = "temporary-key-change-later"
 
 SECURE_MODE = True
 
@@ -115,6 +114,7 @@ def login():
         conn.close()
 
         if user:
+            session["user_id"] = user["id"]
             session["username"] = user["username"]
             session["enc_user_id"] = crypto.encrypt_value(str(user["id"]))
             session["enc_role"] = crypto.encrypt_value(str(user["role"]))
