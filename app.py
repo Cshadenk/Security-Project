@@ -6,10 +6,12 @@ from flask import abort
 from database import get_db, init_db
 from passwords import PASSWORD_RULES, bcrypt_check, bcrypt_hash, md5_hash, validate_password
 from xss_utils import sanitize_comment
+from crypto_session import SessionCryptoManager
 
 app = Flask(__name__) 
-
-app.secret_key = "temporary-key-change-later"
+crypto = SessionCryptoManager()
+crypto.apply_flask_session_config(app)
+##app.secret_key = "temporary-key-change-later"
 
 SECURE_MODE = True
 
@@ -116,6 +118,8 @@ def login():
             session["user_id"] = user["id"]
             session["username"] = user["username"]
             session["role"] = user["role"]
+            session["enc_user_id"] = crypto.encrypt_value(str(user["id"]))
+            session["enc_role"] = crypto.encrypt_value(str(user["role"]))
             return redirect("/dashboard")
         
         return render_template("login.html", error="Invalid credentials")
@@ -170,4 +174,5 @@ def admin():
 
 if __name__ == "__main__":
     init_db()
-    app.run(debug=True, port=5001)
+    cert_path, key_path = crypto.ensure_self_signed_cert()
+    app.run(debug=True, host="127.0.0.1", port=5001, ssl_context=(cert_path, key_path))
