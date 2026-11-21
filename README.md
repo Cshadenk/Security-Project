@@ -56,10 +56,9 @@ cd Security-Project
 python3 -m pip install -r requirements.txt
 ```
 
-Generate a self-signed certificate (needed for HTTPS):
+Self-signed certificate (HTTPS):
 ```bash
-openssl req -x509 -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 365
-```
+Automatically generated locally for testing via `SessionCryptoManager` (`crypto_session.py`) when running `app.py`.```
 
 Run:
 ```bash
