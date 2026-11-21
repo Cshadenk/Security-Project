@@ -1,6 +1,8 @@
 from urllib import response
 
 from flask import Flask, redirect, render_template, request, session
+from functools import wraps
+from flask import abort
 from database import get_db, init_db
 
 app = Flask(__name__) 
@@ -9,6 +11,31 @@ app.secret_key = "temporary-key-change-later"
 
 SECURE_MODE = True
 
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not SECURE_MODE:
+            return f(*args, **kwargs)
+
+        if "user_id" not in session:
+            return redirect("/login")
+
+        conn = get_db()
+
+        user = conn.execute(
+            "SELECT role FROM users WHERE id = ?",
+            (session["user_id"],)
+        ).fetchone()
+
+        conn.close()
+
+        if user is None or user["role"] != "admin":
+            abort(403)
+
+        return f(*args, **kwargs)
+
+    return decorated_function
 
 @app.after_request
 def no_cache(response):
@@ -88,6 +115,13 @@ def dashboard():
 def logout():
     session.clear()
     return redirect("/login")
+
+
+@app.route("/admin")
+@admin_required
+def admin():
+    return render_template("admin.html")
+
 
 
 if __name__ == "__main__":

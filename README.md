@@ -72,10 +72,28 @@ Notes:
 
 **Test accounts**
 
-| Username | Password | Role |
-|----------|----------|------|
-| admin | [set by Member 3] | admin |
-| user1 | [set by Member 3] | user |
+| Username   | Password | Role  |
+| ---------- | -------- | ----- |
+| admin_test | Set locally | admin |
+| testuser1  | Set locally | user  |
+
+
+### Test Accounts
+
+To test the admin page:
+
+1. Run the app and register two accounts: `admin_test` and `testuser1`.
+2. Open the terminal and run:
+
+   ```bash
+   python make_admin.py admin_test
+   ```
+
+   On Mac, use `python3` instead of `python`.
+
+3. Log in as `admin_test` to access `/admin`.
+4. Log in as `testuser1` to check that regular users cannot access `/admin` in secure mode.
+
 
 ## How to Test the Security Features
 
