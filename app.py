@@ -155,7 +155,7 @@ def comments():
     conn.close()
 
     # SECURE: clean again when displaying, which also covers older comments.
-    # VULNERABLE: stored text is displayed as-is (stored XSS).
+    # VULNERABLE: stored text is displayed as is (stored XSS).
     items = [{"username": r["username"],
               "text": sanitize_comment(r["text"]) if SECURE_MODE else r["text"]}
              for r in rows]
