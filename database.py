@@ -1,4 +1,5 @@
-import sqlite3
+
+    import sqlite3
 
 def get_db():
     conn = sqlite3.connect("database.db")
@@ -15,5 +16,15 @@ def init_db():
             role TEXT NOT NULL DEFAULT 'user'
         )
     """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS comments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL,
+            text TEXT NOT NULL
+        )
+    """)
     conn.commit()
     conn.close()
+
+    
+    
