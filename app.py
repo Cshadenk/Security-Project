@@ -15,12 +15,14 @@ SECURE_MODE = True
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        # Allow access without role checks in vulnerable mode.
         if not SECURE_MODE:
             return f(*args, **kwargs)
-
+        # Redirect users who are not logged in.
         if "user_id" not in session:
             return redirect("/login")
-
+# Check the user's current role in the database on each request.
+# This ensures revoked admin access is denied immediately.
         conn = get_db()
 
         user = conn.execute(

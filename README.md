@@ -11,8 +11,8 @@ version (`False`) and the secure version (`True`).
 | Name | Responsibility |
 |------|----------------|
 | Shaden | Core app (register, login, dashboard, logout), SQL Injection |
-| Wajd | Password storage (MD5 to bcrypt), password policy |
-| Raghad | Comments and XSS, role-based access control (admin page) |
+| Wajd | Password storage (MD5 to bcrypt), password policy, Comments and XSS |
+| Raghad | Role-based access control (RBAC), admin page |
 | Aryam | HTTPS/TLS, secure session cookies, encryption |
 
 ## Features
@@ -36,11 +36,13 @@ version (`False`) and the secure version (`True`).
 Security-Project/
 ├── app.py
 ├── database.py
+├── make_admin.py
 ├── requirements.txt
 ├── templates/
 │   ├── login.html
 │   ├── register.html
-│   └── dashboard.html
+│   ├── dashboard.html
+│   └── admin.html
 └── README.md
 ```
 
@@ -70,7 +72,7 @@ Notes:
 - `database.db`, `key.pem`, and `cert.pem` are not committed. The database is
   created automatically on first run.
 
-**Test accounts**
+### Test Accounts
 
 | Username   | Password | Role  |
 | ---------- | -------- | ----- |
@@ -78,7 +80,7 @@ Notes:
 | testuser1  | Set locally | user  |
 
 
-### Test Accounts
+Run make_admin.py from the project folder after registering the account.
 
 To test the admin page:
 
