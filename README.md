@@ -38,6 +38,7 @@ Security-Project/
 ├── database.py
 ├── make_admin.py
 ├── requirements.txt
+├── crypto_session.py
 ├── templates/
 │   ├── login.html
 │   ├── register.html
