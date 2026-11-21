@@ -10,6 +10,7 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import NameOID
 
+# Secret key from environment
 UNIFIED_SECRET_KEY = os.environ.get(
     "SECRET_KEY", "CourseSecurityProject-Unified-Secret-Key-2026"
 )
@@ -19,6 +20,7 @@ class SessionCryptoManager:
     def __init__(self, secret_key: str = UNIFIED_SECRET_KEY, certs_dir: str = "certs"):
         self.secret_key = secret_key
 
+        # Derive Fernet key from secret_key
         fernet_key = base64.urlsafe_b64encode(
             hashlib.sha256(self.secret_key.encode("utf-8")).digest()
         )
@@ -28,6 +30,7 @@ class SessionCryptoManager:
         self.key_path = os.path.join(self.certs_dir, "key.pem")
 
     def apply_flask_session_config(self, app, cookie_name: str = "session", samesite: str = "Lax"):
+        # Set session secret and secure cookie flags
         app.secret_key = self.secret_key
         app.config["SESSION_COOKIE_NAME"] = cookie_name
         app.config["SESSION_COOKIE_HTTPONLY"] = True
@@ -35,9 +38,11 @@ class SessionCryptoManager:
         app.config["SESSION_COOKIE_SECURE"] = True
 
     def encrypt_value(self, value: str) -> str:
+        # Encrypt string with Fernet
         return self.cipher.encrypt(value.encode("utf-8")).decode("utf-8")
 
     def decrypt_value(self, encrypted_value: str | None) -> str | None:
+        # Decrypt Fernet string safely
         if not encrypted_value:
             return None
         try:
@@ -46,6 +51,7 @@ class SessionCryptoManager:
             return None
 
     def ensure_self_signed_cert(self, common_name: str = "localhost") -> tuple[str, str]:
+        # Reuse existing key if present otherwise generate self-signed cert
         os.makedirs(self.certs_dir, exist_ok=True)
         if os.path.exists(self.cert_path) and os.path.exists(self.key_path):
             return self.cert_path, self.key_path
@@ -81,6 +87,7 @@ class SessionCryptoManager:
             .sign(private_key, hashes.SHA256())
         )
 
+        # Save private key and certificate as PEM files
         with open(self.key_path, "wb") as key_file:
             key_file.write(
                 private_key.private_bytes(
