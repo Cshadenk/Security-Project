@@ -5,6 +5,7 @@ from functools import wraps
 from flask import abort
 from database import get_db, init_db
 from passwords import PASSWORD_RULES, bcrypt_check, bcrypt_hash, md5_hash, validate_password
+from xss_utils import sanitize_comment
 
 app = Flask(__name__) 
 
@@ -132,6 +133,32 @@ def dashboard():
 def logout():
     session.clear()
     return redirect("/login")
+
+
+@app.route("/comments", methods=["GET", "POST"])
+def comments():
+    if "user_id" not in session:
+        return redirect("/login")
+
+    conn = get_db()
+    if request.method == "POST":
+        text = request.form.get("comment", "")[:500]
+        if SECURE_MODE:
+            # SECURE (Raghad): clean the comment before saving it
+            text = sanitize_comment(text)
+        conn.execute("INSERT INTO comments (username, text) VALUES (?, ?)",
+                     (session["username"], text))
+        conn.commit()
+
+    rows = conn.execute("SELECT username, text FROM comments ORDER BY id DESC").fetchall()
+    conn.close()
+
+    # SECURE: clean again when displaying, which also covers older comments.
+    # VULNERABLE: stored text is displayed as-is (stored XSS).
+    items = [{"username": r["username"],
+              "text": sanitize_comment(r["text"]) if SECURE_MODE else r["text"]}
+             for r in rows]
+    return render_template("comments.html", comments=items)
 
 
 @app.route("/admin")
