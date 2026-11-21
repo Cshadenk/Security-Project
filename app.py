@@ -1,5 +1,3 @@
-from urllib import response
-
 from flask import Flask, redirect, render_template, request, session
 from functools import wraps
 from flask import abort

@@ -35,17 +35,19 @@ version (`False`) and the secure version (`True`).
 ```
 Security-Project/
 ├── app.py
+├── crypto_session.py
 ├── database.py
 ├── make_admin.py
+├── passwords.py
+├── xss_utils.py
 ├── requirements.txt
-├── crypto_session.py
 ├── templates/
 │   ├── login.html
 │   ├── register.html
 │   ├── dashboard.html
+│   ├── comments.html
 │   └── admin.html
 └── README.md
-```
 
 ## Installation and Running
 
@@ -57,9 +59,9 @@ cd Security-Project
 python3 -m pip install -r requirements.txt
 ```
 
-Self-signed certificate (HTTPS):
+Generate a self-signed certificate (needed for HTTPS):
 ```bash
-Automatically generated locally for testing via `SessionCryptoManager` (`crypto_session.py`) when running `app.py`.
+openssl req -x509 -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 365
 ```
 
 Run:
@@ -114,8 +116,8 @@ Set `SECURE_MODE = False` in `app.py` to see each attack work, then
 - **Secure:** "Invalid credentials".
 
 ### 2. SQL Injection (Register)
-- Register with username `hacker', 'x', 'admin') --` and any password,
-  then log in as `hacker` / `x`.
+- Register with username `hacker', '9dd4e461268c8034f5c8564e155c67a6', 'admin') --` 
+  then log in as `hacker` / `x` (the hash is the MD5 of `x`).
 - **Vulnerable:** dashboard shows Role: admin.
 - **Secure:** the payload is stored as a plain username and the role is `user`.
 
@@ -151,7 +153,7 @@ Set `SECURE_MODE = False` in `app.py` to see each attack work, then
 
 ## Documentation
 - Security report (vulnerabilities, fixes, challenges, testing table,
-  access-control matrix): [https://docs.google.com/document/d/1KCoWNq6hMxWZcCtdKWle3GxE2KWICDucokF0XvRQVKs/edit?usp=sharing]
+  access-control matrix): [https://docs.google.com/document/d/1KCoWNq6hMxWZcCtdKWle3GxE2KWICDucokF0XvRQVKs/view?usp=sharing]
 
 ## Credits
 Flask, SQLite (Python `sqlite3`), bcrypt, bleach, cryptography, OpenSSL.
