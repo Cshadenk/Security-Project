@@ -115,9 +115,7 @@ def login():
         conn.close()
 
         if user:
-            session["user_id"] = user["id"]
             session["username"] = user["username"]
-            session["role"] = user["role"]
             session["enc_user_id"] = crypto.encrypt_value(str(user["id"]))
             session["enc_role"] = crypto.encrypt_value(str(user["role"]))
             return redirect("/dashboard")
