@@ -10,6 +10,8 @@ app = Flask(__name__)
 crypto = SessionCryptoManager()
 crypto.apply_flask_session_config(app)
 
+# Toggle between the vulnerable version (False) and the mitigated version (True)
+# so each attack and its corresponding defense can be demonstrated side by side.
 SECURE_MODE = True
 
 
@@ -40,6 +42,8 @@ def admin_required(f):
 
     return decorated_function
 
+# Prevent browsers from caching protected pages (e.g., /dashboard) so pressing
+# the Back button after logout cannot display a cached copy.
 @app.after_request
 def no_cache(response):
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0, private"
@@ -64,14 +68,14 @@ def register():
         conn = get_db()
         try:
             if not SECURE_MODE:
-                # VULNERABLE: MD5 password hash (Wajd), SQL injection (Shaden)
                 pw_hash = md5_hash(password)
                 query = ("INSERT INTO users (username, password, role)"
                          f"VALUES ('{username}', '{pw_hash}', 'user')"
                 )
                 conn.execute(query)
+                # SECURE: Use parameterized queries (?) to separate SQL structure from user data
+                # (preventing SQL Injection), and hard-code 'user' role to prevent privilege escalation.
             else:
-                # SECURE (Wajd): enforce the password policy, then store a bcrypt hash
                 errors = validate_password(password)
                 if errors:
                     conn.close()
@@ -98,18 +102,19 @@ def login():
 
         conn = get_db()
         if not SECURE_MODE:
-            # VULNERABLE: SQL injection (Shaden) and MD5 comparison (Wajd)
             query = (f"SELECT * FROM users WHERE username='{username}' "
                      f"AND password='{md5_hash(password)}'")
             user = conn.execute(query).fetchone()
         else:
-            # SECURE (Wajd): find the user with a parameterized query, then verify the bcrypt hash
             row = conn.execute(
                 "SELECT * FROM users WHERE username=?",
                 (username,)
             ).fetchone()
             user = row if (row and bcrypt_check(password, row["password"])) else None
         conn.close()
+
+        # Store standard session keys for route checks alongside Fernet-encrypted copies
+        # of sensitive fields (user_id, role) to protect session data.
 
         if user:
             session["user_id"] = user["id"]
@@ -122,14 +127,15 @@ def login():
         return render_template("login.html", error="Invalid credentials")
     return render_template("login.html")
 
-
+# Enforce authentication by verifying an active session before rendering the dashboard.
 @app.route("/dashboard")
 def dashboard():
     if "user_id" not in session:
         return redirect("/login")
     return render_template("dashboard.html")
 
-
+# Terminate the session completely on logout so direct URLs or Back-button
+# navigation cannot restore access.
 @app.route("/logout")
 def logout():
     session.clear()
@@ -145,7 +151,6 @@ def comments():
     if request.method == "POST":
         text = request.form.get("comment", "")[:500]
         if SECURE_MODE:
-            # SECURE (Raghad): clean the comment before saving it
             text = sanitize_comment(text)
         conn.execute("INSERT INTO comments (username, text) VALUES (?, ?)",
                      (session["username"], text))
@@ -154,8 +159,7 @@ def comments():
     rows = conn.execute("SELECT username, text FROM comments ORDER BY id DESC").fetchall()
     conn.close()
 
-    # SECURE: clean again when displaying, which also covers older comments.
-    # VULNERABLE: stored text is displayed as is (stored XSS).
+   
     items = [{"username": r["username"],
               "text": sanitize_comment(r["text"]) if SECURE_MODE else r["text"]}
              for r in rows]
@@ -168,7 +172,8 @@ def admin():
     return render_template("admin.html")
 
 
-
+# Run Flask over HTTPS using an auto-generated self-signed TLS certificate
+# to encrypt data in transit (port 5001 avoids macOS AirPlay conflict on 5000).
 if __name__ == "__main__":
     init_db()
     cert_path, key_path = crypto.ensure_self_signed_cert()

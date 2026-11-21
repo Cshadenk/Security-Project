@@ -14,7 +14,8 @@ from cryptography.x509.oid import NameOID
 UNIFIED_SECRET_KEY = os.environ.get(
     "SECRET_KEY", "CourseSecurityProject-Unified-Secret-Key-2026"
 )
-
+# Manages symmetric session encryption (Fernet), secure cookie flags,
+# and automatic self-signed TLS certificate generation for HTTPS.
 class SessionCryptoManager:
 
     def __init__(self, secret_key: str = UNIFIED_SECRET_KEY, certs_dir: str = "certs"):
@@ -29,6 +30,9 @@ class SessionCryptoManager:
         self.cert_path = os.path.join(self.certs_dir, "cert.pem")
         self.key_path = os.path.join(self.certs_dir, "key.pem")
 
+    # HttpOnly blocks JavaScript (XSS) from reading cookies;
+    # Secure ensures cookies are only sent over HTTPS;
+    # SameSite=Lax mitigates CSRF attacks.
     def apply_flask_session_config(self, app, cookie_name: str = "session", samesite: str = "Lax"):
         # Set session secret and secure cookie flags
         app.secret_key = self.secret_key
@@ -56,6 +60,7 @@ class SessionCryptoManager:
         if os.path.exists(self.cert_path) and os.path.exists(self.key_path):
             return self.cert_path, self.key_path
 
+        # Generate a 2048-bit RSA key and X.509 self-signed certificate for local HTTPS testing.
         private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
 
         subject = issuer = x509.Name(

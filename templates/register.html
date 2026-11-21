@@ -10,6 +10,7 @@
 <form method="POST">
   <input name="username" placeholder="Username"><br>
   <input name="password" type="password" placeholder="Password"><br>
+  {# Display password policy rules to guide users in secure mode #}
   {% if rules %}
     <p>Your password must contain:</p>
     <ul>

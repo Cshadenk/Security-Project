@@ -11,6 +11,4 @@ ALLOWED_TAGS = ["b", "i", "em", "strong", "p", "br"]
 
 
 def sanitize_comment(text):
-    # Removes <script>, event handlers (onerror, onclick...) and javascript: links.
-    # Tags that are not in the whitelist are removed.
     return bleach.clean(text, tags=ALLOWED_TAGS, attributes={}, strip=True)

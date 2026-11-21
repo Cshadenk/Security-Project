@@ -48,7 +48,7 @@ Security-Project/
 │   ├── comments.html
 │   └── admin.html
 └── README.md
-
+```
 ## Installation and Running
 
 **Requirements:** Python 3.9 or higher.
@@ -57,11 +57,6 @@ Security-Project/
 git clone https://github.com/Cshadenk/Security-Project.git
 cd Security-Project
 python3 -m pip install -r requirements.txt
-```
-
-Generate a self-signed certificate (needed for HTTPS):
-```bash
-openssl req -x509 -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 365
 ```
 
 Run:
@@ -116,7 +111,7 @@ Set `SECURE_MODE = False` in `app.py` to see each attack work, then
 - **Secure:** "Invalid credentials".
 
 ### 2. SQL Injection (Register)
-- Register with username `hacker', '9dd4e461268c8034f5c8564e155c67a6', 'admin') --` 
+- Register with username `hacker', '9dd4e461268c8034f5c8564e155c67a6', 'admin') --` and any password.
   then log in as `hacker` / `x` (the hash is the MD5 of `x`).
 - **Vulnerable:** dashboard shows Role: admin.
 - **Secure:** the payload is stored as a plain username and the role is `user`.
@@ -152,8 +147,6 @@ Set `SECURE_MODE = False` in `app.py` to see each attack work, then
 - Expected: redirected to the login page, not the dashboard.
 
 ## Documentation
-- Security report (vulnerabilities, fixes, challenges, testing table,
-  access-control matrix): [https://docs.google.com/document/d/1KCoWNq6hMxWZcCtdKWle3GxE2KWICDucokF0XvRQVKs/view?usp=sharing]
-
+- [Security Report (Google Docs)](https://docs.google.com/document/d/1KCoWNq6hMxWZcCtdKWle3GxE2KWICDucokF0XvRQVKs/edit?usp=sharing)
 ## Credits
 Flask, SQLite (Python `sqlite3`), bcrypt, bleach, cryptography, OpenSSL.

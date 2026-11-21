@@ -5,8 +5,8 @@
 <a href="/admin">Admin</a> |
 <a href="/logout">Logout</a>
 <script>
-  // Back-button protection: if the browser restores this page from its
-  // back/forward cache, force a reload so the server re-checks the session.
+  // Back button protection: if the browser restores this page from its
+  // back/forward cache, force a reload so the server rechecks the session.
   window.addEventListener("pageshow", function (event) {
     if (event.persisted) {
       window.location.reload();
