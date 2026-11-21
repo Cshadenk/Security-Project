@@ -48,6 +48,8 @@ Security-Project/
 
 ## Installation and Running
 
+**Requirements:** Python 3.9 or higher.
+
 ```bash
 git clone https://github.com/Cshadenk/Security-Project.git
 cd Security-Project
@@ -71,6 +73,9 @@ Notes:
 - The app uses port 5001 because macOS AirPlay Receiver blocks port 5000.
 - `database.db`, `key.pem`, and `cert.pem` are not committed. The database is
   created automatically on first run.
+- If you see `ModuleNotFoundError`, make sure you installed the dependencies
+  with `python3 -m pip install -r requirements.txt`, ideally inside a virtual
+  environment (`python3 -m venv venv && source venv/bin/activate`).
 
 ### Test Accounts
 
